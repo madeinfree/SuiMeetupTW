@@ -15,7 +15,7 @@ function App() {
         }}
       >
         <Box>
-          <Heading>Sui Meetup</Heading>
+          <Heading>Sui Meetup TW</Heading>
         </Box>
 
         <Box>
