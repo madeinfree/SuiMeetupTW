@@ -36,7 +36,7 @@ export function OwnedObjects() {
     return <Flex>Loading...</Flex>;
   }
 
-  if (identityData.data.length) {
+  if (identityData?.data.length) {
     return (
       <Flex direction="column" my="2" align="center">
         <Text size="6" align="center" mb="3">
@@ -51,7 +51,7 @@ export function OwnedObjects() {
     );
   }
 
-  if (mintCapData.data.length) {
+  if (mintCapData?.data.length) {
     return (
       <Flex direction="column" my="2">
         <Text size="6" align="center" mb="3">
