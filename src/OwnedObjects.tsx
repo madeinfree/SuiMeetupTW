@@ -10,9 +10,9 @@ import { Button, Flex, Text, TextField, Link } from "@radix-ui/themes";
 const Clock =
   "0x0000000000000000000000000000000000000000000000000000000000000006";
 const Package =
-  "0xe37de4f2a860425080abb821859619c487e9929e1ced38a8c6fce29c90d0a186";
+  "0x080ae3c55d619db4673164bbaefdc0682d6db8d7102f4ed6583bba1bf5a9654a";
 const Dashboard =
-  "0x9243c249a13d182ab0db3ee3a6db9d787ffb161a4e39d8f30c64c054687dc521";
+  "0x36601395d66fb28b338c11bedfb9febd6ce653ac603df12b5faa9e831beb5b7a";
 
 export function OwnedObjects() {
   const { mutate: signAndExecuteTransactionBlock } =
@@ -21,6 +21,7 @@ export function OwnedObjects() {
   const { data, isPending, error }: any = useGetRegister();
   const { data: mintCapData }: any = useGetMintCap();
   const { data: identityData }: any = useGetIdentity();
+  useGetEventsDynamicFields();
 
   const [passId, setPassId] = useState("");
 
@@ -290,5 +291,30 @@ const useGetIdentity = () => {
     isPending,
     error,
     refetch,
+  };
+};
+
+const useGetEventsDynamicFields = () => {
+  const account = useCurrentAccount();
+  const { data, isPending, error } = useSuiClientQuery(
+    "multiGetObjects",
+    {
+      ids: [
+        "0x35b21c4e3abd7824330621764cd34d4d3f1c7d4d8d6d99efa7fb0f768b3708f5",
+        "0x2f857c56636f5ddc249aa23a52a789fd3014ec7758464e9c4812f26071b59c90",
+      ],
+      options: {
+        showContent: true,
+      },
+    },
+    {
+      enabled: !!account,
+    },
+  );
+
+  return {
+    data,
+    isPending,
+    error,
   };
 };
