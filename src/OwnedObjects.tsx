@@ -1,18 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   useCurrentAccount,
   useSuiClientQuery,
   useSignAndExecuteTransactionBlock,
 } from "@mysten/dapp-kit";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
-import { Button, Flex, Text, TextField, Link } from "@radix-ui/themes";
+import { Button, Flex, Text, TextField, Link, Card } from "@radix-ui/themes";
+import axios from "axios";
 
 const Clock =
   "0x0000000000000000000000000000000000000000000000000000000000000006";
 const Package =
-  "0x080ae3c55d619db4673164bbaefdc0682d6db8d7102f4ed6583bba1bf5a9654a";
+  "0xd6c973cd3bfb5d542fa7e15fc148ef89ccb4bfe71992ce3f9cc9308ba78e378b";
 const Dashboard =
-  "0x36601395d66fb28b338c11bedfb9febd6ce653ac603df12b5faa9e831beb5b7a";
+  "0x32bf6fbd39a78281add664dfc50209af1419abaa4b82b444c5839072e4bd39bd";
+const Events =
+  "0x73b3f4e27cfa932b27d6494a6916f25f25a7c367144d33083a20452f5fef2a31";
+const EventsTable =
+  "0x2077f36b98567f64f047251d406cf58a3b18d8088459fab7dc08ebf9520d7bb6";
 
 export function OwnedObjects() {
   const { mutate: signAndExecuteTransactionBlock } =
@@ -21,7 +26,17 @@ export function OwnedObjects() {
   const { data, isPending, error }: any = useGetRegister();
   const { data: mintCapData }: any = useGetMintCap();
   const { data: identityData }: any = useGetIdentity();
-  useGetEventsDynamicFields();
+  const [events, setEvents] = useState([]);
+
+  const getEvents = async () => {
+    if (events.length) return;
+    const allEvents = await useGetEventsDynamicFields();
+    setEvents(allEvents.result);
+  };
+
+  useEffect(() => {
+    getEvents();
+  }, []);
 
   const [passId, setPassId] = useState("");
 
@@ -43,11 +58,80 @@ export function OwnedObjects() {
         <Text size="6" align="center" mb="3">
           嗨，{identityData.data[0].data.content.fields.pass_id}！
         </Text>
-        <Text mb="3">
-          即將在 2024-03-02 13:30-17:00 舉辦第一次小型 Sui 技術分享，
-        </Text>
-        <Text mb="3">過幾天就會開放報名，</Text>
-        <Text mb="3">非常期待您的參與！</Text>
+        {events.map((event: any, index) => {
+          return (
+            <Card key={index} asChild style={{ maxWidth: 550 }} mt="5">
+              <div>
+                <Text as="div" size="2" weight="bold">
+                  {event.data.content.fields.value.fields.title}
+                </Text>
+                <Text as="div" color="gray" size="2" mt="3">
+                  時間：
+                  {new Date(
+                    Number(event.data.content.fields.value.fields.start_at),
+                  ).toLocaleDateString()}
+                </Text>
+                <Text as="div" color="gray" size="2" mt="3">
+                  地點：
+                  <Link
+                    target="_blank"
+                    href="https://maps.app.goo.gl/FKFnxfLpD5Rn1oAu7"
+                  >
+                    言文字 Emoji Cafe & Bar｜貓 x 插座 x 網路 x 深夜
+                  </Link>
+                </Text>
+                <Text as="div" color="gray" size="2" mt="3">
+                  預期人數：
+                  {event.data.content.fields.value.fields.participate_limit}
+                </Text>
+                <Text as="div" color="gray" size="2" mt="3">
+                  參與人數：
+                  {event.data.content.fields.value.fields.participate.length}
+                </Text>
+                <Text as="div" color="gray" size="2" mt="3">
+                  {event.data.content.fields.value.fields.description}
+                </Text>
+                {event.data.content.fields.value.fields.participate.includes(
+                  account.address,
+                ) ? (
+                  <Text align="center" as="div" color="gray" size="2" mt="3">
+                    報名完成
+                  </Text>
+                ) : (
+                  <Button
+                    mt="3"
+                    onClick={() => {
+                      const txb = new TransactionBlock();
+
+                      txb.moveCall({
+                        target: `${Package}::meetup::join_event`,
+                        arguments: [
+                          txb.object(identityData?.data[0].data.objectId),
+                          txb.object(Events),
+                          txb.pure(event.data.content.fields.name),
+                        ],
+                      });
+
+                      signAndExecuteTransactionBlock(
+                        {
+                          transactionBlock: txb,
+                          chain: "sui:testnet",
+                        },
+                        {
+                          onSuccess: () => {
+                            location.reload();
+                          },
+                        },
+                      );
+                    }}
+                  >
+                    我要報名
+                  </Button>
+                )}
+              </div>
+            </Card>
+          );
+        })}
       </Flex>
     );
   }
@@ -294,27 +378,40 @@ const useGetIdentity = () => {
   };
 };
 
-const useGetEventsDynamicFields = () => {
-  const account = useCurrentAccount();
-  const { data, isPending, error } = useSuiClientQuery(
-    "multiGetObjects",
-    {
-      ids: [
-        "0x35b21c4e3abd7824330621764cd34d4d3f1c7d4d8d6d99efa7fb0f768b3708f5",
-        "0x2f857c56636f5ddc249aa23a52a789fd3014ec7758464e9c4812f26071b59c90",
-      ],
-      options: {
-        showContent: true,
+const useGetEventsDynamicFields = async () => {
+  const fields = await axios({
+    method: "POST",
+    url: "https://fullnode.testnet.sui.io/",
+    data: {
+      jsonrpc: "2.0",
+      id: "1",
+      method: "suix_getDynamicFields",
+      params: [EventsTable],
+    },
+  });
+  if (fields.data?.result?.data?.length) {
+    const ids = fields.data?.result?.data.map((d: any) => d.objectId);
+    const result = await axios({
+      method: "POST",
+      url: "https://fullnode.testnet.sui.io/",
+      data: {
+        jsonrpc: "2.0",
+        id: "1",
+        method: "sui_multiGetObjects",
+        params: [
+          ids,
+          {
+            showContent: true,
+          },
+        ],
       },
-    },
-    {
-      enabled: !!account,
-    },
-  );
+    });
+    return {
+      result: result.data.result,
+    };
+  }
 
   return {
-    data,
-    isPending,
-    error,
+    result: [],
   };
 };
