@@ -5,7 +5,16 @@ import {
   useSignAndExecuteTransactionBlock,
 } from "@mysten/dapp-kit";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
-import { Button, Flex, Text, TextField, Link, Card } from "@radix-ui/themes";
+import {
+  Button,
+  Flex,
+  Text,
+  TextField,
+  Link,
+  Card,
+  Badge,
+  Strong,
+} from "@radix-ui/themes";
 import axios from "axios";
 
 const Clock =
@@ -55,16 +64,19 @@ export function OwnedObjects() {
   if (identityData?.data.length) {
     return (
       <Flex direction="column" my="2" align="center">
-        <Text size="6" align="center" mb="3">
+        {/* <Text size="6" align="center" mb="3">
           嗨，{identityData.data[0].data.content.fields.pass_id}！
-        </Text>
+        </Text> */}
         {events.map((event: any, index) => {
           return (
             <Card key={index} asChild style={{ maxWidth: 550 }} mt="5">
               <div>
-                <Text as="div" size="2" weight="bold">
-                  {event.data.content.fields.value.fields.title}
-                </Text>
+                <Flex gap="2">
+                  <Badge color="cyan">New</Badge>
+                  <Text as="div" size="2" weight="bold">
+                    {event.data.content.fields.value.fields.title}
+                  </Text>
+                </Flex>
                 <Text as="div" color="gray" size="2" mt="3">
                   時間：
                   {new Date(
@@ -95,7 +107,7 @@ export function OwnedObjects() {
                   account.address,
                 ) ? (
                   <Text align="center" as="div" color="gray" size="2" mt="3">
-                    報名完成
+                    <Strong>報名完成</Strong>
                   </Text>
                 ) : (
                   <Button
