@@ -81,7 +81,8 @@ export function OwnedObjects() {
                   時間：
                   {new Date(
                     Number(event.data.content.fields.value.fields.start_at),
-                  ).toLocaleDateString()}
+                  ).toLocaleDateString()}{" "}
+                  13:30 ~ 17:00
                 </Text>
                 <Text as="div" color="gray" size="2" mt="3">
                   地點：
