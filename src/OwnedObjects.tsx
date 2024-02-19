@@ -227,7 +227,7 @@ export function OwnedObjects() {
 
   return (
     <Flex direction="column" my="2">
-      <Text size="6" align="center" mb="3">
+      <Text size="4" align="center" mb="3">
         申請活動身份證明鑄造資格
       </Text>
       <Flex
@@ -239,12 +239,9 @@ export function OwnedObjects() {
           borderRadius: 5,
         }}
       >
-        <Text mb="3" size="7">
-          注意事項
-        </Text>
-        <Text mb="3">Sui Meeptup 將會大量採用 Sui 來進行活動登記與紀錄</Text>
+        <Text mb="3">Sui Meeptup TW 將會大量採用 Sui 來進行活動登記與紀錄</Text>
         <Text mb="3">
-          目前正在進行第一次的申請活動身份證明，申請完後會開始排隊，在近期釋出申請空位時，一併分發活動身份證明鑄造資格
+          目前正在進行第一次的申請活動身份證明，申請後在近期釋出申請空位時，會一併分發活動身份證明鑄造資格
         </Text>
         <Text mb="3">
           獲得活動身份證明鑄造資格後，即可在網頁中鑄造未來用於參與活動的「身份證明」
@@ -264,7 +261,7 @@ export function OwnedObjects() {
         account.address,
       ) ? (
         <Text align="center" size="6">
-          已登記完畢，請等待分發身份證明鑄造資格。
+          <Badge color="blue">已登記完畢，請等待分發身份證明鑄造資格。</Badge>
         </Text>
       ) : (
         <Button
