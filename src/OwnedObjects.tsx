@@ -74,7 +74,13 @@ export function OwnedObjects() {
                 <Flex gap="2">
                   <Badge color="cyan">New</Badge>
                   <Text as="div" size="2" weight="bold">
-                    {event.data.content.fields.value.fields.title}
+                    {event.data.content.fields.value.fields.title}{" "}
+                    <Link
+                      target="_blank"
+                      href={`https://suiexplorer.com/object/${event.data.objectId}?network=testnet`}
+                    >
+                      (Sui Explorer)
+                    </Link>
                   </Text>
                 </Flex>
                 <Text as="div" color="gray" size="2" mt="3">
